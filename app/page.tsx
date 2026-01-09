@@ -20,15 +20,18 @@ export default async function Page({
   let status = "Waiting for input...";
 
   if (queryEin) {
-    // 4. Perform the query
+    // 4. Perform the query - we removed .maybeSingle() and added .limit(1)
     const { data, error } = await supabase
       .from('filings')
       .select('*')
       .eq('spons_dfe_ein', queryEin)
-      .maybeSingle();
+      .order('filing_date', { ascending: false }) // Get the most recent one first
+      .limit(1) // Just give me the top result
+      .single(); // Now this will work because we limited it to 1
 
     if (error) {
       status = `Error: ${error.message}`;
+      console.log("DB Error Details:", error);
     } else if (data) {
       result = data;
       status = "Success: Record Found.";
